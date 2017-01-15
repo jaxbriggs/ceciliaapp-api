@@ -23,7 +23,8 @@ $klein = new \Klein\Klein();
 $conector = new \Dao\Conector();
 
 //Usuario
-$klein->respond('POST', '/ceciliaapp-api/user', function ($request) {
+//$klein->respond('POST', '/ceciliaapp-api/user', function ($request) {
+$klein->respond('POST', '/user', function ($request) {
 
     $auth = $request->headers()->all()['Authorization'];
     $user = Token::checkToken($auth);
@@ -35,7 +36,8 @@ $klein->respond('POST', '/ceciliaapp-api/user', function ($request) {
 });
 
 //Login
-$klein->respond('POST', '/ceciliaapp-api/user/login', function ($request) {
+//$klein->respond('POST', '/ceciliaapp-api/user/login', function ($request) {
+$klein->respond('POST', '/user/login', function ($request) {
 
     $requester = json_decode($request->body(), true);
 
