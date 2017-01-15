@@ -1,0 +1,29 @@
+{
+    "name": "loginbox/awt-php",
+    "description": "Loginbox authentication web tokens for php.",
+    "license": "MIT",
+    "homepage": "https://loginbox.io",
+    "support": {
+        "issues": "https://github.com/loginbox/awt-php/issues",
+        "source": "https://github.com/loginbox/awt-php"
+    },
+    "require": {
+        "php": ">=5.5.9",
+        "klein/klein": "v2.1.1",
+        "firebase/php-jwt": "2.0.0",
+        "league/fractal": "0.14.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~4.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Loginbox\\Awt\\": ""
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}
