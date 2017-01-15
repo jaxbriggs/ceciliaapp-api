@@ -1,5 +1,6 @@
 # Composer files
-composer.lock
+# composer.lock
+/app/jwt/gertrudes.txt
 vendor
 
 # OS Helper files
