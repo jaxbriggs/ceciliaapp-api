@@ -14,13 +14,15 @@ use Util\GenericResponse;
 use Controller\LoginController;
 use Jwt\Token;
 use Dao\UsuarioDAO;
+use Dao\TarefaDAO;
+use Model\Tarefa;
 
 $apiBase = \Dao\Conector::$isProduction ? "" : "/ceciliaapp-api";
 $klein = new \Klein\Klein();
 $conector = new \Dao\Conector();
 
 //Usuario
-$klein->respond('POST', $apiBase.'/user', function ($request) {
+$klein->respond('GET', $apiBase.'/user', function ($request) {
 
     $auth = $request->headers()->all()['Authorization'];
     $user = Token::checkToken($auth);
@@ -51,6 +53,21 @@ $klein->respond('POST', $apiBase.'/user/login', function ($request) {
     }
 
     return GenericResponse::buildResponse('LOGIN', "Usuário e/ou senha incorretos.");
+
+});
+
+//Tarefa
+$klein->respond('POST', $apiBase.'/tarefa/nova', function ($request) {
+
+    $auth = $request->headers()->all()['Authorization'];
+    if(Token::checkToken($auth)){
+
+        //Pega a tarefa da requisicao
+        $tarefa = new Tarefa();
+
+        $dao = new TarefaDAO();
+        //$dao->cadastraNova()
+    }
 
 });
 
