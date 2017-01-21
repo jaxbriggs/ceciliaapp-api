@@ -15,7 +15,6 @@ use Controller\LoginController;
 use Jwt\Token;
 use Dao\UsuarioDAO;
 use Dao\TarefaDAO;
-use Model\Tarefa;
 
 $apiBase = \Dao\Conector::$isProduction ? "" : "/ceciliaapp-api";
 $klein = new \Klein\Klein();
@@ -63,10 +62,11 @@ $klein->respond('POST', $apiBase.'/tarefa/nova', function ($request) {
     if(Token::checkToken($auth)){
 
         //Pega a tarefa da requisicao
-        $tarefa = new Tarefa();
+        $body = $request->body();
 
+        $tarefaJson = json_decode(json_decode($body, true)['tarefa'], true);
         $dao = new TarefaDAO();
-        //$dao->cadastraNova()
+        return $dao->cadastraNova($tarefaJson);
     }
 
 });
