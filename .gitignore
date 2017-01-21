@@ -1,7 +1,10 @@
 # Composer files
 # composer.lock
 /app/jwt/gertrudes.txt
+/app/dao/Conector.php
 vendor
+.gitignore
+.htaccess
 
 # OS Helper files
 .php_cs.cache
