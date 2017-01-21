@@ -26,6 +26,3 @@ require_once __DIR__ . '/app/controller/LoginController.php';
 require_once __DIR__ . '/app/dao/Conector.php';
 require_once __DIR__ . '/app/dao/GenericDAO.php';
 require_once __DIR__ . '/app/dao/UsuarioDAO.php';
-
-//Transformers
-require_once __DIR__ . '/app/transformer/UsuarioTransformer.php';

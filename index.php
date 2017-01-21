@@ -11,20 +11,16 @@ require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/requires.php';
 
 use Util\GenericResponse;
-
 use Controller\LoginController;
-
 use Jwt\Token;
-
 use Dao\UsuarioDAO;
 
+$apiBase = \Dao\Conector::$isProduction ? "" : "/ceciliaapp-api";
 $klein = new \Klein\Klein();
-
 $conector = new \Dao\Conector();
 
 //Usuario
-//$klein->respond('POST', '/ceciliaapp-api/user', function ($request) {
-$klein->respond('POST', '/user', function ($request) {
+$klein->respond('POST', $apiBase.'/user', function ($request) {
 
     $auth = $request->headers()->all()['Authorization'];
     $user = Token::checkToken($auth);
@@ -36,8 +32,7 @@ $klein->respond('POST', '/user', function ($request) {
 });
 
 //Login
-//$klein->respond('POST', '/ceciliaapp-api/user/login', function ($request) {
-$klein->respond('POST', '/user/login', function ($request) {
+$klein->respond('POST', $apiBase.'/user/login', function ($request) {
 
     $requester = json_decode($request->body(), true);
 

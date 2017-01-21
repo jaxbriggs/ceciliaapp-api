@@ -8,14 +8,7 @@
 
 namespace Dao;
 
-use League\Fractal\Manager;
-use League\Fractal\Resource\Collection;
-use League\Fractal\Resource\Item;
-use Model\Usuario;
-use Dao\Conector;
-
 use PDO;
-use Transformer\UsuarioTransformer;
 
 class UsuarioDAO extends GenericDAO
 {
@@ -55,11 +48,6 @@ class UsuarioDAO extends GenericDAO
             $red = $sth->fetch();
             if ($red) {
                 return $red;
-                /*
-                $fractal = new Manager;
-                $resource = new Item($red, new UsuarioTransformer);
-                echo $fractal->createData($resource)->toJson();
-                */
             }
         } else {
 
@@ -67,11 +55,6 @@ class UsuarioDAO extends GenericDAO
 
             if ($red) {
                 return $red;
-                /*
-                $fractal = new Manager;
-                $resource = new Collection($red, new UsuarioTransformer);
-                echo $fractal->createData($resource)->toJson();
-                */
             }
         }
 
