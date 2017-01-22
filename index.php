@@ -15,65 +15,120 @@ use Controller\LoginController;
 use Jwt\Token;
 use Dao\UsuarioDAO;
 use Dao\TarefaDAO;
+use Dao\GrupoDAO;
 
 $apiBase = \Dao\Conector::$isProduction ? "" : "/ceciliaapp-api";
 $klein = new \Klein\Klein();
 $conector = new \Dao\Conector();
 
-//Usuario
-$klein->respond('GET', $apiBase.'/user', function ($request) {
+/*USUARIOS*/
+$klein->with($apiBase.'/user', function () use ($klein) {
 
-    $auth = $request->headers()->all()['Authorization'];
-    $user = Token::checkToken($auth);
-    if($user){
-        $dao = new UsuarioDAO;
-        $todos = $dao->consultaTodos();
-        return json_encode($todos);
-    }
+    //GET - Todos os usuarios
+    $klein->respond('GET', '/?', function ($request) {
+        $auth = $request->headers()->all()['Authorization'];
+        $user = Token::checkToken($auth);
+        if($user){
+            $dao = new UsuarioDAO;
+            $todos = $dao->consultaTodos();
+            return json_encode($todos);
+        }
+    });
+
+    //GET - Tarefas de um usuario
+    $klein->respond('GET', '/tarefas', function ($request) {
+        $auth = $request->headers()->all()['Authorization'];
+        $user = Token::checkToken($auth);
+        if($user){
+            $dao = new TarefaDAO();
+            $usuarioTarefas = $dao->consultaPorIdUsuario($user->getId());
+            return json_encode($usuarioTarefas);
+        }
+    });
+
+    //POST - Login
+    $klein->respond('POST', '/login', function ($request) {
+
+        $requester = json_decode($request->body(), true);
+
+        $login_controller = new LoginController();
+
+        $usuario = $login_controller->login($requester['login'], $requester['senha']);
+
+        if ($usuario) {
+
+            $token = Token::gerar([
+                'usuarioId'   => $usuario->getId(),
+                'usuarioNome' => $usuario->getNome(),
+            ]);
+
+            return $token;
+        }
+
+        return GenericResponse::buildResponse('LOGIN', "Usuário e/ou senha incorretos.");
+
+    });
+
 });
 
-//Login
-$klein->respond('POST', $apiBase.'/user/login', function ($request) {
+/*TAREFAS*/
+$klein->with($apiBase.'/tarefa', function () use ($klein) {
 
-    $requester = json_decode($request->body(), true);
+    //PUT - Nova tarefa
+    $klein->respond('PUT', '/?', function ($request) {
 
-    $login_controller = new LoginController();
+        $auth = $request->headers()->all()['Authorization'];
+        $user = Token::checkToken($auth);
+        if($user){
 
-    $usuario = $login_controller->login($requester['login'], $requester['senha']);
+            //Pega a tarefa da requisicao
+            $body = $request->body();
 
-    if ($usuario) {
+            $tarefaJson = json_decode(json_decode($body, true)['tarefa'], true);
+            $dao = new TarefaDAO();
+            return $dao->cadastraNova($tarefaJson, $user->getId());
+        }
 
-        $token = Token::gerar([
-            'usuarioId'   => $usuario->getId(),
-            'usuarioNome' => $usuario->getNome(),
-        ]);
+    });
 
-        return $token;
-    }
+    //DELETE - Deleta tarefa
+    $klein->respond('DELETE', '/[i:id]', function ($request) {
+        $auth = $request->headers()->all()['Authorization'];
+        if(Token::checkToken($auth)){
+            $dao = new TarefaDAO();
+            return $dao->deletaPorId($request->id);
+        }
+    });
 
-    return GenericResponse::buildResponse('LOGIN', "Usuário e/ou senha incorretos.");
+    //POST - Altera tarefa
+    $klein->respond('POST', '/?', function ($request) {
+        $auth = $request->headers()->all()['Authorization'];
+        if(Token::checkToken($auth)){
+
+            //Pega a tarefa da requisicao
+            $body = $request->body();
+
+            $tarefaJson = json_decode(json_decode($body, true)['tarefa'], true);
+
+            $dao = new TarefaDAO();
+            return $dao->alteraPorId($tarefaJson);
+        }
+    });
 
 });
 
-//Tarefa
-$klein->respond('POST', $apiBase.'/tarefa/nova', function ($request) {
+/*GRUPOS*/
+$klein->with($apiBase.'/grupo', function () use ($klein) {
 
-    $auth = $request->headers()->all()['Authorization'];
-    if(Token::checkToken($auth)){
-
-        //Pega a tarefa da requisicao
-        $body = $request->body();
-
-        $tarefaJson = json_decode(json_decode($body, true)['tarefa'], true);
-        $dao = new TarefaDAO();
-        return $dao->cadastraNova($tarefaJson);
-    }
+    //GET - Nova tarefa
+    $klein->respond('GET', '/?', function ($request) {
+        $auth = $request->headers()->all()['Authorization'];
+        if(Token::checkToken($auth)){
+            $dao = new GrupoDAO();
+            return json_encode($dao->consultaTodos());
+        }
+    });
 
 });
-
-//DON'T DELETE
-/*
- *
- */
 
 $klein->dispatch();

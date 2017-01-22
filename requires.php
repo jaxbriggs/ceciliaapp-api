@@ -18,9 +18,6 @@ require_once __DIR__ . '/app/jwt/Token.php';
 
 //Model
 require_once __DIR__ . '/app/model/Usuario.php';
-require_once __DIR__ . '/app/model/Grupo.php';
-require_once __DIR__ . '/app/model/Tarefa.php';
-require_once __DIR__ . '/app/model/TarefaPeriodicidade.php';
 
 //Controllers
 require_once __DIR__ . '/app/controller/LoginController.php';
@@ -30,3 +27,4 @@ require_once __DIR__ . '/app/dao/Conector.php';
 require_once __DIR__ . '/app/dao/GenericDAO.php';
 require_once __DIR__ . '/app/dao/UsuarioDAO.php';
 require_once __DIR__ . '/app/dao/TarefaDAO.php';
+require_once __DIR__ . '/app/dao/GrupoDAO.php';

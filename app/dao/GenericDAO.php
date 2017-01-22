@@ -8,9 +8,38 @@
 
 namespace Dao;
 
+use PDO;
+use Dao\Conector;
 
 abstract class GenericDAO {
-    abstract protected function get($query, $params);
     abstract public function consultaPorId($id);
     abstract public function consultaTodos();
+    protected function get($query, $singular, $params = array())
+    {
+        $con = new Conector;
+        $con->conectar();
+
+        $sth = Conector::$conexao->prepare($query);
+        $sth->execute($params);
+
+        if($singular) {
+
+            $sth->setFetchMode(PDO::FETCH_ASSOC);
+            $red = $sth->fetch();
+            if ($red) {
+                return $red;
+            }
+        } else {
+
+            $red = $sth->fetchAll(PDO::FETCH_ASSOC);
+
+            if ($red) {
+                return $red;
+            }
+        }
+
+        $con->desconectar();
+
+        return null;
+    }
 }
