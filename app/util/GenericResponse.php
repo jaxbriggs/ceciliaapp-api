@@ -13,19 +13,19 @@ use Enum\HttpStatusCode;
 class GenericResponse
 {
 
-    public static function buildResponse($operacao, $body, $status = HttpStatusCode::OK){
+    public static function buildResponse($operacao, $body, $data = null, $status = HttpStatusCode::OK){
 
         $response = ['response' =>
                 [
                   'status' => $status,
                   'operation' => $operacao,
-                  'body' => $body
+                  'body' => $body,
+                  'data' => $data
                 ]
                ];
 
         return json_encode($response);
 
     }
-
 
 }

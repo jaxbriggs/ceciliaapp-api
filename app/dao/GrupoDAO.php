@@ -27,6 +27,6 @@ class GrupoDAO extends GenericDAO
 
     public function consultaTodos()
     {
-        return parent::get("SELECT ID, NOME, DT_CADASTRO FROM GRUPO", false);
+        return parent::get("SELECT ID AS id, NOME as nome, DT_CADASTRO as dt_CADASTRO FROM GRUPO", false);
     }
 }
