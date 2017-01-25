@@ -21,17 +21,17 @@ class UsuarioDAO extends GenericDAO
 
     public function consultaPorId($id)
     {
-        return self::get('SELECT id, nome, login FROM USUARIO WHERE ID = ?', true, array($id));
+        return self::get('SELECT id, nome, login FROM usuario WHERE id = ?', true, array($id));
     }
 
     public function consultaPorLogin($login)
     {
-        return self::get('SELECT id, nome, login, senha FROM USUARIO WHERE LOGIN = ?', true, array($login));
+        return self::get('SELECT id, nome, login, senha FROM usuario WHERE login = ?', true, array($login));
     }
 
     public function consultaTodos()
     {
-        return $this->get('SELECT id, nome, login FROM USUARIO', false);
+        return $this->get('SELECT id, nome, login FROM usuario', false);
     }
 
     protected function get($query, $singular, $params = array())

@@ -34,26 +34,26 @@ class TarefaDAO extends GenericDAO
 
             //Verifica se a periodicidade e diaria
             if (
-            !(is_null($tarefaJsonArray['periodicidade']['id_DIA_SEMANA']) &&
-                is_null($tarefaJsonArray['periodicidade']['id_DIA_MES']) &&
-                is_null($tarefaJsonArray['periodicidade']['dt_A_PARTIR']) &&
-                $tarefaJsonArray['periodicidade']['qt_PASSO'] === 1)
+            !(is_null($tarefaJsonArray['periodicidade']['id_dia_semana']) &&
+                is_null($tarefaJsonArray['periodicidade']['id_dia_mes']) &&
+                is_null($tarefaJsonArray['periodicidade']['dt_a_partir']) &&
+                $tarefaJsonArray['periodicidade']['qt_passo'] === 1)
             ) {
                 //Insere a periodicidade
                 $sql =
-                    "INSERT INTO TAREFA_PERIODICIDADE (ID_DIA_SEMANA, ID_DIA_MES, DT_A_PARTIR, QT_PASSO)"
+                    "INSERT INTO tarefa_periodicidade (id_dia_semana, id_dia_mes, dt_a_partir, qt_passo)"
                     . " VALUES (:diaSemana, :diaMes, :dtPartir, :passo)";
 
                 $stmt = Conector::$conexao->prepare($sql);
 
-                $stmt->bindValue(':diaSemana', $tarefaJsonArray['periodicidade']['id_DIA_SEMANA'], PDO::PARAM_INT);
-                $stmt->bindValue(':diaMes', $tarefaJsonArray['periodicidade']['id_DIA_MES'], PDO::PARAM_STR);
-                if (!is_null($tarefaJsonArray['periodicidade']['dt_A_PARTIR'])) {
-                    $stmt->bindValue(':dtPartir', date("Y-m-d", $tarefaJsonArray['periodicidade']['dt_A_PARTIR'] / 1000), PDO::PARAM_STR);
+                $stmt->bindValue(':diaSemana', $tarefaJsonArray['periodicidade']['id_dia_semana'], PDO::PARAM_INT);
+                $stmt->bindValue(':diaMes', $tarefaJsonArray['periodicidade']['id_dia_mes'], PDO::PARAM_STR);
+                if (!is_null($tarefaJsonArray['periodicidade']['dt_a_partir'])) {
+                    $stmt->bindValue(':dtPartir', date("Y-m-d", $tarefaJsonArray['periodicidade']['dt_a_partir'] / 1000), PDO::PARAM_STR);
                 } else {
                     $stmt->bindValue(':dtPartir', null, PDO::PARAM_STR);
                 }
-                $stmt->bindValue(':passo', $tarefaJsonArray['periodicidade']['qt_PASSO'], PDO::PARAM_STR);
+                $stmt->bindValue(':passo', $tarefaJsonArray['periodicidade']['qt_passo'], PDO::PARAM_STR);
 
                 $stmt->execute();
                 $periodicidadeId = Conector::$conexao->lastInsertId();
@@ -63,7 +63,7 @@ class TarefaDAO extends GenericDAO
 
             //Insere a tarefa
             $sql =
-                "INSERT INTO TAREFA (TITULO, ID_PERIODICIDADE, ID_GRUPO, ID_RESPONSAVEL, ID_USUARIO, DT_CADASTRO)
+                "INSERT INTO tarefa (titulo, id_periodicidade, id_grupo, id_responsavel, id_usuario, dt_cadastro)
                  VALUES (:titulo, :periodicidade, :grupo, :responsavel, :usuario, NOW())";
 
             $stmt = Conector::$conexao->prepare($sql);
@@ -78,7 +78,6 @@ class TarefaDAO extends GenericDAO
 
             $stmt->bindParam(':grupo', $tarefaJsonArray['grupo']['id'], PDO::PARAM_STR);
             $stmt->bindParam(':responsavel', $tarefaJsonArray['responsavel']['id'], PDO::PARAM_STR);
-            //$stmt->bindParam(':usuario', $tarefaJsonArray['usuarioId'], PDO::PARAM_INT);
             $stmt->bindParam(':usuario', $userId, PDO::PARAM_INT);
             $stmt->execute();
             $lastId = Conector::$conexao->lastInsertId();
@@ -95,18 +94,18 @@ class TarefaDAO extends GenericDAO
     public function deletaPorId($id){
 
         //DELETA
-        $tarefa = array(["ID" => $id, "PERIODICIDADE" => null]);
+        $tarefa = array(["id" => $id, "periodicidade" => null]);
         $this->consultaTarefasPeriodicidade($tarefa);
 
         $sql = "";
-        if($tarefa[0]['PERIODICIDADE']['ID'] === 1){
-            $sql = "DELETE FROM TAREFA"
-                  ." WHERE TAREFA.ID = :id";
+        if($tarefa[0]['periodicidade']['id'] === 1){
+            $sql = "DELETE FROM tarefa"
+                  ." WHERE tarefa.id = :id";
         } else {
-            $sql = "DELETE FROM TAREFA_PERIODICIDADE, TAREFA"
-                  ." USING TAREFA_PERIODICIDADE, TAREFA"
-                  ." WHERE TAREFA_PERIODICIDADE.ID = TAREFA.ID_PERIODICIDADE AND"
-                  ." TAREFA.ID = :id";
+            $sql = "DELETE FROM tarefa_periodicidade, tarefa"
+                  ." USING tarefa_periodicidade, tarefa"
+                  ." WHERE tarefa_periodicidade.id = tarefa.id_periodicidade AND"
+                  ." tarefa.id = :id";
         }
 
         $con = new Conector;
@@ -133,7 +132,7 @@ class TarefaDAO extends GenericDAO
     public function alteraPorId($tarefaJsonArray){
 
         //ALTERA
-        $tarefa = array(["ID" => $tarefaJsonArray['id'], "PERIODICIDADE" => null]);
+        $tarefa = array(["id" => $tarefaJsonArray['id'], "periodicidade" => null]);
         $this->consultaTarefasPeriodicidade($tarefa);
 
         try {
@@ -144,21 +143,21 @@ class TarefaDAO extends GenericDAO
             Conector::$conexao->beginTransaction();
 
             $sql = ""; $stmt = null; $deletarUltimaPeriodicidade = false;
-            if ($tarefa[0]['PERIODICIDADE']['ID'] === 1) {
+            if ($tarefa[0]['periodicidade']['id'] === 1) {
 
                 if (
-                (is_null($tarefaJsonArray['periodicidade']['id_DIA_SEMANA']) &&
-                    is_null($tarefaJsonArray['periodicidade']['id_DIA_MES']) &&
-                    is_null($tarefaJsonArray['periodicidade']['dt_A_PARTIR']) &&
-                    $tarefaJsonArray['periodicidade']['qt_PASSO'] === 1)
+                (is_null($tarefaJsonArray['periodicidade']['id_dia_semana']) &&
+                    is_null($tarefaJsonArray['periodicidade']['id_dia_mes']) &&
+                    is_null($tarefaJsonArray['periodicidade']['dt_a_partir']) &&
+                    $tarefaJsonArray['periodicidade']['qt_passo'] === 1)
                 ) {
 
-                    $sql = "UPDATE TAREFA tar"
+                    $sql = "UPDATE tarefa tar"
                         . " SET"
-                        . " tar.TITULO = :titulo,"
-                        . " tar.ID_GRUPO = :grupo,"
-                        . " tar.ID_RESPONSAVEL = :responsavel"
-                        . " WHERE tar.ID = :tarefa";
+                        . " tar.titulo = :titulo,"
+                        . " tar.id_grupo = :grupo,"
+                        . " tar.id_responsavel = :responsavel"
+                        . " WHERE tar.id = :tarefa";
 
                     $stmt = Conector::$conexao->prepare($sql);
                     $stmt->bindParam(':titulo', $tarefaJsonArray['titulo'], PDO::PARAM_STR);
@@ -170,31 +169,31 @@ class TarefaDAO extends GenericDAO
 
                     //Insere a periodicidade
                     $periodicidadeSql =
-                        "INSERT INTO TAREFA_PERIODICIDADE (ID_DIA_SEMANA, ID_DIA_MES, DT_A_PARTIR, QT_PASSO)"
+                        "INSERT INTO tarefa_periodicidade (id_dia_semana, id_dia_mes, dt_a_partir, qt_passo)"
                         . " VALUES (:diaSemana, :diaMes, :dtPartir, :passo)";
 
                     $periodicidadeStmt = Conector::$conexao->prepare($periodicidadeSql);
 
-                    $periodicidadeStmt->bindValue(':diaSemana', $tarefaJsonArray['periodicidade']['id_DIA_SEMANA'], PDO::PARAM_INT);
-                    $periodicidadeStmt->bindValue(':diaMes', $tarefaJsonArray['periodicidade']['id_DIA_MES'], PDO::PARAM_STR);
-                    if (!is_null($tarefaJsonArray['periodicidade']['dt_A_PARTIR'])) {
-                        $periodicidadeStmt->bindValue(':dtPartir', date("Y-m-d", $tarefaJsonArray['periodicidade']['dt_A_PARTIR'] / 1000), PDO::PARAM_STR);
+                    $periodicidadeStmt->bindValue(':diaSemana', $tarefaJsonArray['periodicidade']['id_dia_semana'], PDO::PARAM_INT);
+                    $periodicidadeStmt->bindValue(':diaMes', $tarefaJsonArray['periodicidade']['id_dia_mes'], PDO::PARAM_STR);
+                    if (!is_null($tarefaJsonArray['periodicidade']['dt_a_partir'])) {
+                        $periodicidadeStmt->bindValue(':dtPartir', date("Y-m-d", $tarefaJsonArray['periodicidade']['dt_a_partir'] / 1000), PDO::PARAM_STR);
                     } else {
                         $periodicidadeStmt->bindValue(':dtPartir', null, PDO::PARAM_STR);
                     }
-                    $periodicidadeStmt->bindValue(':passo', $tarefaJsonArray['periodicidade']['qt_PASSO'], PDO::PARAM_STR);
+                    $periodicidadeStmt->bindValue(':passo', $tarefaJsonArray['periodicidade']['qt_passo'], PDO::PARAM_STR);
 
                     $periodicidadeStmt->execute();
                     $periodicidadeId = Conector::$conexao->lastInsertId();
                     $tarefaJsonArray['periodicidade']['id'] = $periodicidadeId;
 
-                    $sql = "UPDATE TAREFA tar"
+                    $sql = "UPDATE tarefa tar"
                           ." SET"
-                          ." tar.TITULO = :titulo,"
-                          ." tar.ID_GRUPO = :grupo,"
-                          ." tar.ID_RESPONSAVEL = :responsavel,"
-                          ." tar.ID_PERIODICIDADE = :periodicidade"
-                          ." WHERE tar.ID = :tarefa";
+                          ." tar.titulo = :titulo,"
+                          ." tar.id_grupo = :grupo,"
+                          ." tar.id_responsavel = :responsavel,"
+                          ." tar.id_periodicidade = :periodicidade"
+                          ." WHERE tar.id = :tarefa";
 
                     $stmt = Conector::$conexao->prepare($sql);
                     $stmt->bindParam(':titulo', $tarefaJsonArray['titulo'], PDO::PARAM_STR);
@@ -208,44 +207,44 @@ class TarefaDAO extends GenericDAO
             } else {
 
                 if (
-                !(is_null($tarefaJsonArray['periodicidade']['id_DIA_SEMANA']) &&
-                    is_null($tarefaJsonArray['periodicidade']['id_DIA_MES']) &&
-                    is_null($tarefaJsonArray['periodicidade']['dt_A_PARTIR']) &&
-                    $tarefaJsonArray['periodicidade']['qt_PASSO'] === 1)
+                !(is_null($tarefaJsonArray['periodicidade']['id_dia_semana']) &&
+                    is_null($tarefaJsonArray['periodicidade']['id_dia_mes']) &&
+                    is_null($tarefaJsonArray['periodicidade']['dt_a_partir']) &&
+                    $tarefaJsonArray['periodicidade']['qt_passo'] === 1)
                 ) {
 
-                    $sql = "UPDATE TAREFA tar, TAREFA_PERIODICIDADE tarper"
+                    $sql = "UPDATE tarefa tar, tarefa_periodicidade tarper"
                         . " SET"
-                        . " tar.TITULO = :titulo,"
-                        . " tar.ID_GRUPO = :grupo,"
-                        . " tar.ID_RESPONSAVEL = :responsavel,"
-                        . " tarper.ID_DIA_SEMANA = :diaSemana,"
-                        . " tarper.ID_DIA_MES = :diaMes,"
-                        . " tarper.DT_A_PARTIR = :diaPartir,"
-                        . " tarper.QT_PASSO = :passo"
-                        . " WHERE tarper.ID = tar.ID_PERIODICIDADE AND"
+                        . " tar.titulo = :titulo,"
+                        . " tar.id_grupo = :grupo,"
+                        . " tar.id_responsavel = :responsavel,"
+                        . " tarper.id_dia_semana = :diaSemana,"
+                        . " tarper.id_dia_mes = :diaMes,"
+                        . " tarper.dt_a_partir = :diaPartir,"
+                        . " tarper.qt_passo = :passo"
+                        . " WHERE tarper.id = tar.id_periodicidade AND"
                         . " tar.ID = :tarefa";
 
                     $stmt = Conector::$conexao->prepare($sql);
                     $stmt->bindParam(':titulo', $tarefaJsonArray['titulo'], PDO::PARAM_STR);
                     $stmt->bindParam(':grupo', $tarefaJsonArray['grupo']['id'], PDO::PARAM_INT);
                     $stmt->bindParam(':responsavel', $tarefaJsonArray['responsavel']['id'], PDO::PARAM_INT);
-                    $stmt->bindParam(':diaSemana', $tarefaJsonArray['periodicidade']['id_DIA_SEMANA'], PDO::PARAM_STR);
-                    $stmt->bindParam(':diaMes', $tarefaJsonArray['periodicidade']['id_DIA_MES'], PDO::PARAM_STR);
-                    $stmt->bindParam(':diaPartir', $tarefaJsonArray['periodicidade']['dt_A_PARTIR'], PDO::PARAM_STR);
-                    $stmt->bindParam(':passo', $tarefaJsonArray['periodicidade']['qt_PASSO'], PDO::PARAM_INT);
+                    $stmt->bindParam(':diaSemana', $tarefaJsonArray['periodicidade']['id_dia_semana'], PDO::PARAM_STR);
+                    $stmt->bindParam(':diaMes', $tarefaJsonArray['periodicidade']['id_dia_mes'], PDO::PARAM_STR);
+                    $stmt->bindParam(':diaPartir', $tarefaJsonArray['periodicidade']['dt_a_partir'], PDO::PARAM_STR);
+                    $stmt->bindParam(':passo', $tarefaJsonArray['periodicidade']['qt_passo'], PDO::PARAM_INT);
                     $stmt->bindParam(':tarefa', $tarefaJsonArray['id'], PDO::PARAM_INT);
                 } else {
 
                     $deletarUltimaPeriodicidade = true;
 
-                    $sql = "UPDATE TAREFA tar"
+                    $sql = "UPDATE tarefa tar"
                         ." SET"
-                        ." tar.TITULO = :titulo,"
-                        ." tar.ID_GRUPO = :grupo,"
-                        ." tar.ID_RESPONSAVEL = :responsavel,"
-                        ." tar.ID_PERIODICIDADE = :periodicidade"
-                        ." WHERE tar.ID = :tarefa";
+                        ." tar.titulo = :titulo,"
+                        ." tar.id_grupo = :grupo,"
+                        ." tar.id_responsavel = :responsavel,"
+                        ." tar.id_periodicidade = :periodicidade"
+                        ." WHERE tar.id = :tarefa";
 
                     $stmt = Conector::$conexao->prepare($sql);
                     $stmt->bindParam(':titulo', $tarefaJsonArray['titulo'], PDO::PARAM_STR);
@@ -262,7 +261,7 @@ class TarefaDAO extends GenericDAO
                 $periodicidadeSql = "DELETE FROM TAREFA_PERIODICIDADE WHERE ID = :id";
 
                 $periodicidadeStmt = Conector::$conexao->prepare($periodicidadeSql);
-                $periodicidadeStmt->bindParam(':id', $tarefa[0]['PERIODICIDADE']['ID'], PDO::PARAM_INT);
+                $periodicidadeStmt->bindParam(':id', $tarefa[0]['periodicidade']['id'], PDO::PARAM_INT);
                 $periodicidadeStmt->execute();
             }
 
@@ -285,13 +284,13 @@ class TarefaDAO extends GenericDAO
 
     public function consultaPorId($id)
     {
-        $sql = "SELECT tar.ID,"
-            ."tar.TITULO,"
-            ."tar.ID_PERIODICIDADE AS PERIODICIDADE,"
-            ."tar.ID_GRUPO AS GRUPO,"
-            ."tar.ID_RESPONSAVEL AS RESPONSAVEL,"
-            ."tar.DT_CADASTRO"
-            ." FROM TAREFA tar"
+        $sql = "SELECT tar.id,"
+            ."tar.titulo,"
+            ."tar.id_periodicidade AS periodicidade,"
+            ."tar.id_grupo AS grupo,"
+            ."tar.id_responsavel AS responsavel,"
+            ."tar.dt_cadastro"
+            ." FROM tarefa tar"
             ." WHERE tar.ID = ?";
 
         $tarefa = parent::get($sql, true, array($id));
@@ -314,15 +313,15 @@ class TarefaDAO extends GenericDAO
 
     public function consultaPorIdUsuario($idUsuario)
     {
-        $sql = "SELECT tar.ID,"
-              ."tar.TITULO,"
-              ."tar.ID_PERIODICIDADE AS PERIODICIDADE,"
-              ."tar.ID_GRUPO AS GRUPO,"
-              ."tar.ID_RESPONSAVEL AS RESPONSAVEL,"
-              ."tar.DT_CADASTRO"
-              ." FROM TAREFA tar"
-              ." WHERE tar.ID_USUARIO = ?"
-              ." ORDER BY tar.ID";
+        $sql = "SELECT tar.id,"
+              ."tar.titulo,"
+              ."tar.id_periodicidade AS periodicidade,"
+              ."tar.id_grupo AS grupo,"
+              ."tar.id_responsavel AS responsavel,"
+              ."tar.dt_cadastro"
+              ." FROM tarefa tar"
+              ." WHERE tar.id_usuario = ?"
+              ." ORDER BY tar.id";
 
         $tarefas = parent::get($sql, false, array($idUsuario));
 
@@ -338,47 +337,47 @@ class TarefaDAO extends GenericDAO
     private function consultaTarefasPeriodicidade(&$tarefas)
     {
 
-        $tarefasIds = array_column($tarefas, 'ID');
+        $tarefasIds = array_column($tarefas, 'id');
 
-        $sql = "SELECT tarper.* FROM TAREFA_PERIODICIDADE tarper"
-              ." INNER JOIN TAREFA tar ON tar.ID_PERIODICIDADE = tarper.ID"
-              ." WHERE tar.ID IN (".implode(", ", $tarefasIds).")"
-              ." ORDER BY tar.ID";
+        $sql = "SELECT tarper.* FROM tarefa_periodicidade tarper"
+              ." INNER JOIN tarefa tar ON tar.id_periodicidade = tarper.id"
+              ." WHERE tar.id IN (".implode(", ", $tarefasIds).")"
+              ." ORDER BY tar.id";
 
         $periodicidades = parent::get($sql, false);
         foreach (is_null($periodicidades) ? array() : $periodicidades as $key => $value) {
-            $tarefas[$key]["PERIODICIDADE"] = $value;
+            $tarefas[$key]["periodicidade"] = $value;
         }
     }
 
     private function consultaTarefasGrupo(&$tarefas)
     {
 
-        $tarefasIds = array_column($tarefas, 'ID');
+        $tarefasIds = array_column($tarefas, 'id');
 
-        $sql = "SELECT gr.* FROM GRUPO gr"
-              ." INNER JOIN TAREFA tar ON tar.ID_GRUPO = gr.ID"
-              ." WHERE tar.ID IN (".implode(", ", $tarefasIds).")"
-              ." ORDER BY tar.ID";
+        $sql = "SELECT gr.* FROM grupo gr"
+              ." INNER JOIN tarefa tar ON tar.id_grupo = gr.id"
+              ." WHERE tar.id IN (".implode(", ", $tarefasIds).")"
+              ." ORDER BY tar.id";
 
         $grupos = parent::get($sql, false);
         foreach (is_null($grupos) ? array() : $grupos as $key => $value) {
-            $tarefas[$key]["GRUPO"] = $value;
+            $tarefas[$key]["grupo"] = $value;
         }
     }
 
     private function consultaTarefasResponsavel(&$tarefas)
     {
-        $tarefasIds = array_column($tarefas, 'ID');
+        $tarefasIds = array_column($tarefas, 'id');
 
-        $sql = "SELECT usr.ID, usr.NOME, usr.LOGIN FROM USUARIO usr"
-            ." INNER JOIN TAREFA tar ON tar.ID_RESPONSAVEL = usr.ID"
-            ." WHERE tar.ID IN (".implode(", ", $tarefasIds).")"
-            ." ORDER BY tar.ID";
+        $sql = "SELECT usr.id, usr.nome, usr.login FROM usuario usr"
+            ." INNER JOIN tarefa tar ON tar.id_responsavel = usr.id"
+            ." WHERE tar.id IN (".implode(", ", $tarefasIds).")"
+            ." ORDER BY tar.id";
 
         $responsaveis = parent::get($sql, false);
         foreach (is_null($responsaveis) ? array() : $responsaveis as $key => $value) {
-            $tarefas[$key]["RESPONSAVEL"] = $value;
+            $tarefas[$key]["responsavel"] = $value;
         }
     }
 }
